@@ -1,0 +1,56 @@
+version: '2'
+services:
+  elk-stack-playground:
+    container_name: elk-stack-playground
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - /usr/src/app
+    environment:
+      PORT: 3000
+    ports:
+      - 3000:3000
+
+  elasticsearch:
+    build:
+      context: build/elasticsearch/
+    volumes:
+      - ./build/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - elk
+  logstash:
+    build:
+      context: build/logstash/
+    volumes:
+      - ./build/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./build/logstash/pipeline:/usr/share/logstash/pipeline:ro
+    ports:
+      - "5000:5000"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+  kibana:
+    build:
+      context: build/kibana/
+    volumes:
+      - ./build/kibana/config/:/usr/share/kibana/config:ro
+    ports:
+      - "5601:5601"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+
+networks:
+  elk:
+    driver: bridge
+
