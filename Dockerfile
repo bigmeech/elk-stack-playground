@@ -10,8 +10,7 @@ WORKDIR ${HOMEDIR}
 COPY package.json ${HOMEDIR}
 COPY package-lock.json ${HOMEDIR}
 
-RUN npm install --verbose
-RUN rm -f .npmrc
+RUN npm install
 
 EXPOSE 3000
 CMD [ "npm", "start" ]
